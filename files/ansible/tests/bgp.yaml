@@ -1,0 +1,27 @@
+tests_include:
+  - check_bgp_houston_fw0
+  - check_bgp_austin_fw0
+
+### ---------------------------------------------------------------------------------
+### Assert BGP adjacency is up with houston-fw0
+### ---------------------------------------------------------------------------------
+check_bgp_houston_fw0:
+  - command: show bgp neighbor 192.168.255.210
+
+  - item:
+      xpath: '//bgp-information/bgp-peer'
+      tests:
+        - is-equal: peer-state, Established
+          err: Neighbor houston-fw0 in group {{post['peer-group']}} is in {{post['peer-state']}} State (Established expected)
+
+### ---------------------------------------------------------------------------------
+### Assert BGP adjacency is up with austin-fw0
+### ---------------------------------------------------------------------------------
+check_bgp_austin_fw0:
+  - command: show bgp neighbor 192.168.255.220
+
+  - item:
+      xpath: '//bgp-information/bgp-peer'
+      tests:
+        - is-equal: peer-state, Established
+          err: Neighbor austin-fw0 in group {{post['peer-group']}} is in {{post['peer-state']}} State (Established expected)

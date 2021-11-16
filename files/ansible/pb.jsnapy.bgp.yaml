@@ -1,0 +1,50 @@
+### ---------------------------------------------------------------------------
+### JSNAPY TESTS
+### ---------------------------------------------------------------------------
+- hosts: all
+  connection: local
+  gather_facts: False
+  become: False
+  roles: 
+    - juniper.junos
+  vars:
+    provider_info:
+      host: "{{ inventory_hostname }}"
+      user: "automation"
+      passwd: "juniper123"
+  tasks:
+
+    # #################################################
+    # ### Check BGP Neighbors                       ###
+    # #################################################
+    - name: "### CHECK BGP NEIGHBORS"
+      juniper_junos_jsnapy:
+        # define remote device parameters
+        host: "{{ ansible_host }}"
+        user: "{{ provider_info.user }}"
+        passwd: "{{ provider_info.passwd }}"
+
+        # define our test file and action
+        test_files: tests/bgp.yaml
+        action: snapcheck
+
+      # store the output of our test in a new object test_bgp
+      register: test_bgp
+
+      # disable failed tests from cancelling the rest of our play
+      ignore_errors: True
+
+      # tag the result as test_bgp
+      tags: [ test_bgp ]
+
+    - name: "print test_bgp object to screen"
+      debug:
+        msg: "{{ test_bgp }}"
+      # when:
+      #   - "test_bgp.passPercentage != 100"
+
+    - name: Check Alarms Test
+      assert:
+        that:
+          - "test_bgp.passPercentage == 100"
+      tags: [ test_bgp ]
